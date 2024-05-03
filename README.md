@@ -11,7 +11,12 @@
 This repository was created as part of the course *Communication Technologies & Machine Learning I*.
 
 ## Project Structure
-TODO
+- `data`: sensor data in .csv format
+- `models`: implementation of feature selection algorithms
+- `notebooks`: directory of jupyter notebooks (.ipynb) to run interactive python code
+- `results`: directory of plots and other visualizations
+- `scripts`: python scripts
+- `LICENSE`: information about the terms under which one can use the code in this repository
 
 ## Setup
 TODO
