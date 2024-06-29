@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import os
 
@@ -8,15 +9,21 @@ def combine_csv_files(ntp_intervals_, output_file_, sensor_type):
         df['NTP'] = pd.to_datetime(df['NTP'])
         filtered_df = df[(df['NTP'] > ntp_start_) & (df['NTP'] < ntp_end_)].copy()
         selected_columns = filtered_df[['NTP', f'{sensor_type}-X', f'{sensor_type}-Y', f'{sensor_type}-Z']].copy()
-        selected_columns['LabelSelf'] = ''
-        selected_columns['LabelOther'] = ''
+        selected_columns['Roughness_Label'] = ''
+        selected_columns['Curb_Label'] = ''
         return selected_columns
 
-    def add_label_to_data(data, label_df_, label_column):
+    def add_label_to_data(data, label_df_):
         label_df_['NTP'] = pd.to_datetime(label_df_['NTP'])
         for _, label_row in label_df_.iterrows():
+            val = label_row['Label']
+            if val == 'curb_none':
+                continue
+            if val == 'roughness_none':
+                val = 'roughness_low'
             nearest_data_index = (data['NTP'] - label_row['NTP']).abs().idxmin()
-            data.at[nearest_data_index, label_column] = label_row['Label']
+            col_name = 'Roughness_Label' if val == 'roughness_high' or val == 'roughness_medium' or val == 'roughness_low' else 'Curb_Label'
+            data.at[nearest_data_index, col_name] = val
         return data
 
     if not os.path.exists(output_file_):
@@ -30,10 +37,16 @@ def combine_csv_files(ntp_intervals_, output_file_, sensor_type):
 
         filtered_data = filter_and_select_columns(file_path, ntp_start, ntp_end)
 
+        # Resample to 10Hz
+        filtered_data.set_index('NTP', inplace=True, drop=False)
+        filtered_data = filtered_data.resample('100ms').first()
+
         for label_type, label_file in file_info.items():
             if label_type.startswith('Label'):
                 label_df = pd.read_csv(label_file)
-                filtered_data = add_label_to_data(filtered_data, label_df, label_type)
+                filtered_data = add_label_to_data(filtered_data, label_df)
+        filtered_data['Roughness_Label'] = filtered_data['Roughness_Label'].replace('', np.nan)
+        filtered_data['Roughness_Label'] = filtered_data['Roughness_Label'].ffill()
 
         if os.path.getsize(output_file_) > 0:
             filtered_data.to_csv(output_file_, mode='a', header=False, index=False)
@@ -63,10 +76,6 @@ ntp_intervals = {  # file+path: (start_ntp, end_ntp)
         'LabelSelf': '../data/handlebar/4_aleyna/Label/Label.0.csv',
         'LabelOther': '../data/label/4_aleyna/Label/Label.0.csv'
     },
-    '../data/backwheel/5_konstantin/Accelerometer/Accelerometer.0.csv': {
-        'interval': ('2024-05-28 16:24:54.226', '2024-05-28 16:36:50.000'),
-        'LabelSelf': '../data/handlebar/5_konstantin/Label/Label.0.csv',
-    },
 }
 output_file = '../data/combined/backwheel_acc.csv'
 combine_csv_files(ntp_intervals, output_file, "Acc")
@@ -92,10 +101,6 @@ ntp_intervals = {  # file+path: (start_ntp, end_ntp)
         'interval': ('2024-05-28 16:11:26.149', '2024-05-28 16:21:35.000'),
         'LabelSelf': '../data/handlebar/4_aleyna/Label/Label.0.csv',
         'LabelOther': '../data/label/4_aleyna/Label/Label.0.csv'
-    },
-    '../data/backwheel/5_konstantin/Gyroscope/Gyroscope.0.csv': {
-        'interval': ('2024-05-28 16:24:54.226', '2024-05-28 16:36:50.000'),
-        'LabelSelf': '../data/handlebar/5_konstantin/Label/Label.0.csv',
     },
 }
 output_file = '../data/combined/backwheel_gyro.csv'
@@ -123,10 +128,6 @@ ntp_intervals = {  # file+path: (start_ntp, end_ntp)
         'LabelSelf': '../data/handlebar/4_aleyna/Label/Label.0.csv',
         'LabelOther': '../data/label/4_aleyna/Label/Label.0.csv'
     },
-    '../data/handlebar/5_konstantin/Accelerometer/Accelerometer.0.csv': {
-        'interval': ('2024-05-28 16:24:54.226', '2024-05-28 16:36:50.000'),
-        'LabelSelf': '../data/handlebar/5_konstantin/Label/Label.0.csv',
-    },
 }
 output_file = '../data/combined/handlebar_acc.csv'
 combine_csv_files(ntp_intervals, output_file, "Acc")
@@ -152,10 +153,6 @@ ntp_intervals = {  # file+path: (start_ntp, end_ntp)
         'interval': ('2024-05-28 16:11:26.149', '2024-05-28 16:21:35.000'),
         'LabelSelf': '../data/handlebar/4_aleyna/Label/Label.0.csv',
         'LabelOther': '../data/label/4_aleyna/Label/Label.0.csv'
-    },
-    '../data/handlebar/5_konstantin/Gyroscope/Gyroscope.0.csv': {
-        'interval': ('2024-05-28 16:24:54.226', '2024-05-28 16:36:50.000'),
-        'LabelSelf': '../data/handlebar/5_konstantin/Label/Label.0.csv',
     },
 }
 output_file = '../data/combined/handlebar_gyro.csv'
