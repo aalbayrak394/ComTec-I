@@ -48,6 +48,9 @@ def combine_csv_files(ntp_intervals_, output_file_, sensor_type):
         filtered_data['Roughness_Label'] = filtered_data['Roughness_Label'].replace('', np.nan)
         filtered_data['Roughness_Label'] = filtered_data['Roughness_Label'].ffill()
 
+        # Fix for missing value for timeslot
+        filtered_data.iloc[:, :5] = filtered_data.iloc[:, :5].ffill()
+
         if os.path.getsize(output_file_) > 0:
             filtered_data.to_csv(output_file_, mode='a', header=False, index=False)
         else:
