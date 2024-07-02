@@ -1,6 +1,10 @@
+import os
+
+import h5py
 import numpy as np
 import pandas as pd
-import os
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 
 
 def combine_csv_files(ntp_intervals_, output_file_, sensor_type):
@@ -26,9 +30,27 @@ def combine_csv_files(ntp_intervals_, output_file_, sensor_type):
             data.at[nearest_data_index, col_name] = val
         return data
 
-    if not os.path.exists(output_file_):
-        with open(output_file_, 'w') as f:
-            f.write('')
+    def create_sliding_windows_with_labels(df, label_rough, label_curb, window_size, step_size, scaled_data_):
+        num_windows = (len(df) - window_size) // step_size + 1
+        windows_ = np.zeros((num_windows, window_size, df.shape[1]))
+        labels_ = []
+
+        for i in range(num_windows):
+            start_idx = i * step_size
+            end_idx = start_idx + window_size
+            windows_[i] = scaled_data_[start_idx:end_idx]
+
+            label_curb_window = label_curb.iloc[start_idx:end_idx]
+            if (label_curb_window != '').any():
+                window_label = label_curb_window[label_curb_window != ''].iloc[0]
+            else:
+                window_label = label_rough.iloc[start_idx:end_idx].mode()[0]
+
+            labels_.append(window_label)
+
+        return windows_, np.array(labels_, dtype='S')
+
+    windows_train_together, windows_test_together, labels_train_together, labels_test_together = None, None, None, None
 
     for file_path, file_info in ntp_intervals_.items():
         ntp_start, ntp_end = file_info['interval']
@@ -37,10 +59,11 @@ def combine_csv_files(ntp_intervals_, output_file_, sensor_type):
 
         filtered_data = filter_and_select_columns(file_path, ntp_start, ntp_end)
 
-        # Resample to 10Hz
+        # Resample to 100Hz
         filtered_data.set_index('NTP', inplace=True, drop=False)
-        filtered_data = filtered_data.resample('100ms').first()
+        filtered_data = filtered_data.resample('10ms').first()
 
+        # Add Labels
         for label_type, label_file in file_info.items():
             if label_type.startswith('Label'):
                 label_df = pd.read_csv(label_file)
@@ -50,12 +73,43 @@ def combine_csv_files(ntp_intervals_, output_file_, sensor_type):
 
         # Fix for missing value for timeslot
         filtered_data.iloc[:, :5] = filtered_data.iloc[:, :5].ffill()
+        filtered_data['Curb_Label'] = filtered_data['Curb_Label'].fillna('')
 
-        if os.path.getsize(output_file_) > 0:
-            filtered_data.to_csv(output_file_, mode='a', header=False, index=False)
+        scaler = StandardScaler()
+        scaled_data = scaler.fit_transform(filtered_data.iloc[:, 1:4])
+
+        # Sliding Windows
+        windows, labels = create_sliding_windows_with_labels(filtered_data.iloc[:, 1:4],
+                                                             filtered_data["Roughness_Label"],
+                                                             filtered_data["Curb_Label"], 100, 50,
+                                                             scaled_data)
+
+        # Test-Train
+        windows_train, windows_test, labels_train, labels_test = train_test_split(
+            windows, labels, test_size=0.2, random_state=42
+        )
+
+        if windows_train_together is None:
+            windows_train_together = windows_train
+            windows_test_together = windows_test
+            labels_train_together = labels_train
+            labels_test_together = labels_test
         else:
-            filtered_data.to_csv(output_file_, mode='w', header=True, index=False)
+            windows_train_together = np.concatenate((windows_train_together, windows_train), axis=0)
+            windows_test_together = np.concatenate((windows_test_together, windows_test), axis=0)
+            labels_train_together = np.concatenate((labels_train_together, labels_train), axis=0)
+            labels_test_together = np.concatenate((labels_test_together, labels_test), axis=0)
 
+    with h5py.File(output_file_ + '_train.h5', 'w') as hf_train:
+        hf_train.create_dataset('windows', data=windows_train_together)
+        hf_train.create_dataset('labels', data=labels_train_together)
+
+    with h5py.File(output_file_ + '_test.h5', 'w') as hf_test:
+        hf_test.create_dataset('windows', data=windows_test_together)
+        hf_test.create_dataset('labels', data=labels_test_together)
+
+
+# TODO: auf die jeweils richtigen Label beschränken
 
 # backwheel_acc
 ntp_intervals = {  # file+path: (start_ntp, end_ntp)
@@ -80,7 +134,7 @@ ntp_intervals = {  # file+path: (start_ntp, end_ntp)
         'LabelOther': '../data/label/4_aleyna/Label/Label.0.csv'
     },
 }
-output_file = '../data/combined/backwheel_acc.csv'
+output_file = '../data/combined/backwheel_acc'
 combine_csv_files(ntp_intervals, output_file, "Acc")
 
 # backwheel_gyro
@@ -106,7 +160,7 @@ ntp_intervals = {  # file+path: (start_ntp, end_ntp)
         'LabelOther': '../data/label/4_aleyna/Label/Label.0.csv'
     },
 }
-output_file = '../data/combined/backwheel_gyro.csv'
+output_file = '../data/combined/backwheel_gyro'
 combine_csv_files(ntp_intervals, output_file, "Gyr")
 
 # handlebar_acc
@@ -132,7 +186,7 @@ ntp_intervals = {  # file+path: (start_ntp, end_ntp)
         'LabelOther': '../data/label/4_aleyna/Label/Label.0.csv'
     },
 }
-output_file = '../data/combined/handlebar_acc.csv'
+output_file = '../data/combined/handlebar_acc'
 combine_csv_files(ntp_intervals, output_file, "Acc")
 
 # handlebar_gyro
@@ -158,7 +212,7 @@ ntp_intervals = {  # file+path: (start_ntp, end_ntp)
         'LabelOther': '../data/label/4_aleyna/Label/Label.0.csv'
     },
 }
-output_file = '../data/combined/handlebar_gyro.csv'
+output_file = '../data/combined/handlebar_gyro'
 combine_csv_files(ntp_intervals, output_file, "Gyr")
 
 print("Finished")
