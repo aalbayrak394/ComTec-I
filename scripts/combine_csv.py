@@ -30,9 +30,9 @@ def combine_csv_files(ntp_intervals_, output_file_, sensor_type):
             data.at[nearest_data_index, col_name] = val
         return data
 
-    def create_sliding_windows_with_labels(df, label_rough, label_curb, window_size, step_size, scaled_data_):
-        num_windows = (len(df) - window_size) // step_size + 1
-        windows_ = np.zeros((num_windows, window_size, df.shape[1]))
+    def create_sliding_windows_with_labels(label_rough, label_curb, window_size, step_size, scaled_data_):
+        num_windows = (len(scaled_data_) - window_size) // step_size + 1
+        windows_ = np.zeros((num_windows, window_size, scaled_data_.shape[1]))
         labels_ = []
 
         for i in range(num_windows):
@@ -75,30 +75,36 @@ def combine_csv_files(ntp_intervals_, output_file_, sensor_type):
         filtered_data.iloc[:, :5] = filtered_data.iloc[:, :5].ffill()
         filtered_data['Curb_Label'] = filtered_data['Curb_Label'].fillna('')
 
-        scaler = StandardScaler()
-        scaled_data = scaler.fit_transform(filtered_data.iloc[:, 1:4])
-
-        # Sliding Windows
-        windows, labels = create_sliding_windows_with_labels(filtered_data.iloc[:, 1:4],
-                                                             filtered_data["Roughness_Label"],
-                                                             filtered_data["Curb_Label"], 100, 50,
-                                                             scaled_data)
-
         # Test-Train
         windows_train, windows_test, labels_train, labels_test = train_test_split(
-            windows, labels, test_size=0.2, random_state=42
+            filtered_data.iloc[:, 1:4], filtered_data.iloc[:, 4:6], test_size=0.2, shuffle=False
         )
 
+        scaler = StandardScaler()
+        scaler.fit(windows_train)
+        train_scaled = scaler.transform(windows_train)
+        test_scaled = scaler.transform(windows_test)
+
+        # Sliding Windows
+        windows_train_scaled, labels_train_scaled = create_sliding_windows_with_labels(labels_train["Roughness_Label"],
+                                                                                       labels_train["Curb_Label"], 100,
+                                                                                       50,
+                                                                                       train_scaled)
+        windows_test_scaled, labels_test_scaled = create_sliding_windows_with_labels(labels_test["Roughness_Label"],
+                                                                                     labels_test["Curb_Label"], 100,
+                                                                                     50,
+                                                                                     test_scaled)
+
         if windows_train_together is None:
-            windows_train_together = windows_train
-            windows_test_together = windows_test
-            labels_train_together = labels_train
-            labels_test_together = labels_test
+            windows_train_together = windows_train_scaled
+            windows_test_together = windows_test_scaled
+            labels_train_together = labels_train_scaled
+            labels_test_together = labels_test_scaled
         else:
-            windows_train_together = np.concatenate((windows_train_together, windows_train), axis=0)
-            windows_test_together = np.concatenate((windows_test_together, windows_test), axis=0)
-            labels_train_together = np.concatenate((labels_train_together, labels_train), axis=0)
-            labels_test_together = np.concatenate((labels_test_together, labels_test), axis=0)
+            windows_train_together = np.concatenate((windows_train_together, windows_train_scaled), axis=0)
+            windows_test_together = np.concatenate((windows_test_together, windows_test_scaled), axis=0)
+            labels_train_together = np.concatenate((labels_train_together, labels_train_scaled), axis=0)
+            labels_test_together = np.concatenate((labels_test_together, labels_test_scaled), axis=0)
 
     with h5py.File(output_file_ + '_train.h5', 'w') as hf_train:
         hf_train.create_dataset('windows', data=windows_train_together)
