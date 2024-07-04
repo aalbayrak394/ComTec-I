@@ -130,7 +130,7 @@ ntp_intervals = {  # file+path: (start_ntp, end_ntp)
         'LabelOther': '../data/label/2_svenja/Label/Label.0.csv'
     },
     '../data/backwheel/3_konstantin/Accelerometer/Accelerometer.0.csv': {
-        'interval': ('2024-05-28 15:56:29.423', '2024-05-28 16:09:52.000'),
+        'interval': ('2024-05-28 15:56:31.000', '2024-05-28 16:09:37.000'),
         'LabelSelf': '../data/handlebar/3_konstantin/Label/Label.0.csv',
         'LabelOther': '../data/label/3_konstantin/Label/Label.0.csv'
     },
@@ -156,7 +156,7 @@ ntp_intervals = {  # file+path: (start_ntp, end_ntp)
         'LabelOther': '../data/label/2_svenja/Label/Label.0.csv'
     },
     '../data/backwheel/3_konstantin/Gyroscope/Gyroscope.0.csv': {
-        'interval': ('2024-05-28 15:56:29.423', '2024-05-28 16:09:52.000'),
+        'interval': ('2024-05-28 15:56:31.000', '2024-05-28 16:09:37.000'),
         'LabelSelf': '../data/handlebar/3_konstantin/Label/Label.0.csv',
         'LabelOther': '../data/label/3_konstantin/Label/Label.0.csv'
     },
@@ -182,7 +182,7 @@ ntp_intervals = {  # file+path: (start_ntp, end_ntp)
         'LabelOther': '../data/label/2_svenja/Label/Label.0.csv'
     },
     '../data/handlebar/3_konstantin/Accelerometer/Accelerometer.0.csv': {
-        'interval': ('2024-05-28 15:56:29.423', '2024-05-28 16:09:52.000'),
+        'interval': ('2024-05-28 15:56:31.000', '2024-05-28 16:09:37.000'),
         'LabelSelf': '../data/handlebar/3_konstantin/Label/Label.0.csv',
         'LabelOther': '../data/label/3_konstantin/Label/Label.0.csv'
     },
@@ -208,7 +208,7 @@ ntp_intervals = {  # file+path: (start_ntp, end_ntp)
         'LabelOther': '../data/label/2_svenja/Label/Label.0.csv'
     },
     '../data/handlebar/3_konstantin/Gyroscope/Gyroscope.0.csv': {
-        'interval': ('2024-05-28 15:56:29.423', '2024-05-28 16:09:52.000'),
+        'interval': ('2024-05-28 15:56:31.000', '2024-05-28 16:09:37.000'),
         'LabelSelf': '../data/handlebar/3_konstantin/Label/Label.0.csv',
         'LabelOther': '../data/label/3_konstantin/Label/Label.0.csv'
     },
