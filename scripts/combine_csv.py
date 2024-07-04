@@ -131,8 +131,7 @@ ntp_intervals = {  # file+path: (start_ntp, end_ntp)
     },
     '../data/backwheel/3_konstantin/Accelerometer/Accelerometer.0.csv': {
         'interval': ('2024-05-28 15:56:31.000', '2024-05-28 16:09:37.000'),
-        'LabelSelf': '../data/handlebar/3_konstantin/Label/Label.0.csv',
-        'LabelOther': '../data/label/3_konstantin/Label/Label.0.csv'
+        'LabelSelf': '../data/handlebar/3_konstantin/Label/Label_edited.csv'
     },
     '../data/backwheel/4_aleyna/Accelerometer/Accelerometer.0.csv': {
         'interval': ('2024-05-28 16:11:26.149', '2024-05-28 16:21:35.000'),
@@ -157,8 +156,7 @@ ntp_intervals = {  # file+path: (start_ntp, end_ntp)
     },
     '../data/backwheel/3_konstantin/Gyroscope/Gyroscope.0.csv': {
         'interval': ('2024-05-28 15:56:31.000', '2024-05-28 16:09:37.000'),
-        'LabelSelf': '../data/handlebar/3_konstantin/Label/Label.0.csv',
-        'LabelOther': '../data/label/3_konstantin/Label/Label.0.csv'
+        'LabelSelf': '../data/handlebar/3_konstantin/Label/Label_edited.csv'
     },
     '../data/backwheel/4_aleyna/Gyroscope/Gyroscope.0.csv': {
         'interval': ('2024-05-28 16:11:26.149', '2024-05-28 16:21:35.000'),
@@ -183,8 +181,7 @@ ntp_intervals = {  # file+path: (start_ntp, end_ntp)
     },
     '../data/handlebar/3_konstantin/Accelerometer/Accelerometer.0.csv': {
         'interval': ('2024-05-28 15:56:31.000', '2024-05-28 16:09:37.000'),
-        'LabelSelf': '../data/handlebar/3_konstantin/Label/Label.0.csv',
-        'LabelOther': '../data/label/3_konstantin/Label/Label.0.csv'
+        'LabelSelf': '../data/handlebar/3_konstantin/Label/Label_edited.csv'
     },
     '../data/handlebar/4_aleyna/Accelerometer/Accelerometer.0.csv': {
         'interval': ('2024-05-28 16:11:26.149', '2024-05-28 16:21:35.000'),
@@ -209,8 +206,7 @@ ntp_intervals = {  # file+path: (start_ntp, end_ntp)
     },
     '../data/handlebar/3_konstantin/Gyroscope/Gyroscope.0.csv': {
         'interval': ('2024-05-28 15:56:31.000', '2024-05-28 16:09:37.000'),
-        'LabelSelf': '../data/handlebar/3_konstantin/Label/Label.0.csv',
-        'LabelOther': '../data/label/3_konstantin/Label/Label.0.csv'
+        'LabelSelf': '../data/handlebar/3_konstantin/Label/Label_edited.csv'
     },
     '../data/handlebar/4_aleyna/Gyroscope/Gyroscope.0.csv': {
         'interval': ('2024-05-28 16:11:26.149', '2024-05-28 16:21:35.000'),
