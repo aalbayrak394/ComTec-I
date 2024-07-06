@@ -1,5 +1,3 @@
-import os
-
 import h5py
 import numpy as np
 import pandas as pd
@@ -25,6 +23,10 @@ def combine_csv_files(ntp_intervals_, output_file_, sensor_type):
                 continue
             if val == 'roughness_none':
                 val = 'roughness_low'
+            if val == 'curb_low' or val == 'curb_high':
+                val = 'curb'
+            if val == 'roughness_medium':
+                val = 'roughness_high'
             nearest_data_index = (data['NTP'] - label_row['NTP']).abs().idxmin()
             col_name = 'Roughness_Label' if val == 'roughness_high' or val == 'roughness_medium' or val == 'roughness_low' else 'Curb_Label'
             data.at[nearest_data_index, col_name] = val
@@ -116,6 +118,43 @@ def combine_csv_files(ntp_intervals_, output_file_, sensor_type):
 
 
 # TODO: auf die jeweils richtigen Label beschränken
+
+
+ntp_intervals = {  # file+path: (start_ntp, end_ntp)
+    '../data/backwheel/3_konstantin/Accelerometer/Accelerometer.0.csv': {
+        'interval': ('2024-05-28 15:56:31.000', '2024-05-28 16:09:37.000'),
+        'LabelSelf': '../data/handlebar/3_konstantin/Label/Label_edited.csv'
+    },
+}
+output_file = '../data/combined/backwheel_me_acc'
+combine_csv_files(ntp_intervals, output_file, "Acc")
+
+ntp_intervals = {  # file+path: (start_ntp, end_ntp)
+    '../data/handlebar/3_konstantin/Accelerometer/Accelerometer.0.csv': {
+        'interval': ('2024-05-28 15:56:31.000', '2024-05-28 16:09:37.000'),
+        'LabelSelf': '../data/handlebar/3_konstantin/Label/Label_edited.csv'
+    },
+}
+output_file = '../data/combined/handlebar_me_acc'
+combine_csv_files(ntp_intervals, output_file, "Acc")
+
+ntp_intervals = {  # file+path: (start_ntp, end_ntp)
+    '../data/backwheel/3_konstantin/Gyroscope/Gyroscope.0.csv': {
+        'interval': ('2024-05-28 15:56:31.000', '2024-05-28 16:09:37.000'),
+        'LabelSelf': '../data/handlebar/3_konstantin/Label/Label_edited.csv'
+    },
+}
+output_file = '../data/combined/backwheel_me_gyro'
+combine_csv_files(ntp_intervals, output_file, "Gyr")
+
+ntp_intervals = {  # file+path: (start_ntp, end_ntp)
+    '../data/handlebar/3_konstantin/Gyroscope/Gyroscope.0.csv': {
+        'interval': ('2024-05-28 15:56:31.000', '2024-05-28 16:09:37.000'),
+        'LabelSelf': '../data/handlebar/3_konstantin/Label/Label_edited.csv'
+    },
+}
+output_file = '../data/combined/handlebar_me_gyro'
+combine_csv_files(ntp_intervals, output_file, "Gyr")
 
 # backwheel_acc
 ntp_intervals = {  # file+path: (start_ntp, end_ntp)
