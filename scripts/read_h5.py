@@ -1,6 +1,6 @@
 import h5py
 
-with h5py.File('../data/combined/handlebar_gyro_train.h5', 'r') as hf:
+with h5py.File('../data/combined/backwheel_acc_test.h5', 'r') as hf:
     windows = hf['windows'][:]
     labels = hf['labels'][:]
 
