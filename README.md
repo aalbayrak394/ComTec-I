@@ -4,7 +4,7 @@
 
 **Authors**: Aleyna Albayrak, Konstantin Stitz, Marco Wennesz, Svenja Wilhelmi
 
-**E-Mail**: a.albayrak@uni-kassel.de, [insert Konstantins E-Mail], [insert Marcos E-Mail], [insert Svenjas E-Mail]
+**E-Mail**: a.albayrak@uni-kassel.de, uk069836@student.uni-kassel.de, marco.wennesz@student.uni-kassel.de, [insert Svenjas E-Mail]
 
 **Institute**: Communication Technology, University of Kassel, Germany
 
