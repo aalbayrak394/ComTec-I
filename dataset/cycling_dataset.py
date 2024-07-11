@@ -1,6 +1,7 @@
 import h5py
 import numpy as np
-from torch.utils.data import Dataset, DataLoader
+import torch
+from torch.utils.data import Dataset
 
 class CyclingDataset(Dataset):
     def __init__(self, file_path_acc, file_path_gyro):
@@ -23,4 +24,4 @@ class CyclingDataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, idx):
-        return self.data[idx], self.labels[idx]
+        return torch.tensor(self.data[idx], dtype=torch.float32), self.labels[idx]
