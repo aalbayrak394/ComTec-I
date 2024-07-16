@@ -30,4 +30,4 @@ class TorchCyclingDataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, idx):
-        return torch.tensor(self.data[idx], dtype=torch.float32), self.labels[idx]
+        return torch.tensor(self.data[idx], dtype=torch.float32)
