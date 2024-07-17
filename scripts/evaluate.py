@@ -55,6 +55,8 @@ X_test_pca = pca.transform(X_test)
 
 # TODO: 4. Autoencoder
 
+# TODO: 5. SVC
+
 # TODO: evaluate each subset of features with RandomForestClassifier
 selected_features = {
     'fisher': (X_train_fisher, X_test_fisher),
