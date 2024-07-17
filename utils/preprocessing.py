@@ -92,8 +92,11 @@ class PreprocessingPipeline:
             data['Roughness_Label'] = data['Roughness_Label'].replace('', np.nan)
             data['Roughness_Label'] = data['Roughness_Label'].ffill()
 
-            # Fix for missing value for timeslot # TODO: why 5 ? -> ask Konstantin and adapt
-            # data.iloc[:, :5] = data.iloc[:, :5].ffill()
+            columns_order = ['NTP', 'Acc-X', 'Acc-Y', 'Acc-Z', 'Gyr-X', 'Gyr-Y', 'Gyr-Z', 'Roughness_Label', 'Curb_Label']
+            data = data.reindex(columns=columns_order)
+
+            # Fix for missing value for timeslot
+            data.iloc[:, :8] = data.iloc[:, :8].ffill()
             data['Curb_Label'] = data['Curb_Label'].fillna('')
             
             train_sets.append(data)
@@ -133,27 +136,3 @@ class PreprocessingPipeline:
             splits.append((windows_train, labels_train, windows_test, labels_test))
 
         return splits
-
-
-
-
-
-if __name__ == '__main__':
-    # Only handlebar data (accelerometer and gyroscope) is used
-    ntp_intervals = {  # file+path: (start_ntp, end_ntp)
-        '1_marco': ('2024-05-28 15:21:46.830', '2024-05-28 15:36:21.000'),
-        '2_svenja': ('2024-05-28 15:39:02.218', '2024-05-28 15:52:16.613'),
-        '3_konstantin': ('2024-05-28 15:56:31.000', '2024-05-28 16:09:37.000'),
-        '4_aleyna': ('2024-05-28 16:11:26.149', '2024-05-28 16:21:35.000'),
-    }
-
-    pipeline = PreprocessingPipeline(ntp_intervals)
-    splits = pipeline.run()
-
-    # with h5py.File('data.h5', 'w') as f:
-    #     for i, split in enumerate(splits):
-    #         group = f.create_group(f'split_{i}')
-    #         group.create_dataset('train_data', data=split[0])
-    #         group.create_dataset('train_labels', data=split[1])
-    #         group.create_dataset('test_data', data=split[2])
-    #         group.create_dataset('test_labels', data=split[3])
