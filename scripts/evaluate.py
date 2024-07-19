@@ -1,10 +1,13 @@
-""" Evaluate different feature selection algorithms with RandomForestClssifier """
+""" Evaluate different feature selection algorithms with RandomForestClassifier """
 import sys
+
+from sklearn.svm import SVC
+
 sys.path.append('..')
 
 from sklearn.ensemble import RandomForestClassifier
 from feature_selection.fisher_score import fisher_score
-from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import SelectKBest, RFE
 from sklearn.decomposition import PCA, KernelPCA
 from sklearn.metrics import accuracy_score, f1_score
 
@@ -14,13 +17,13 @@ from utils.feature_extraction import compute_features
 
 # read segmented data
 train_dataset = get_dataset(
-    file_path_acc='/Users/Aleyna/downloads/preprocessed/handlebar_acc_train.h5',
-    file_path_gyro='/Users/Aleyna/downloads/preprocessed/handlebar_gyro_train.h5',
+    file_path_acc='../data/preprocessed/handlebar_acc_train.h5',
+    file_path_gyro='../data/preprocessed/handlebar_gyro_train.h5',
 )
 
 test_dataset = get_dataset(
-    file_path_acc='/Users/Aleyna/downloads/preprocessed/handlebar_acc_test.h5',
-    file_path_gyro='/Users/Aleyna/downloads/preprocessed/handlebar_gyro_test.h5',
+    file_path_acc='../data/preprocessed/handlebar_acc_test.h5',
+    file_path_gyro='../data/preprocessed/handlebar_gyro_test.h5',
 )
 
 # extract features
@@ -57,10 +60,16 @@ X_test_pca = pca.transform(X_test)
 
 # TODO: 5. SVC
 
+svc = SVC(kernel="linear", C=1)
+svm_selector = RFE(estimator=svc, n_features_to_select=10, step=1)
+X_train_svm = svm_selector.fit_transform(X_train, y_train)
+X_test_svm = svm_selector.transform(X_test)
+
 # TODO: evaluate each subset of features with RandomForestClassifier
 selected_features = {
     'fisher': (X_train_fisher, X_test_fisher),
     'pca': (X_train_pca, X_test_pca),
+    'svm': (X_train_svm, X_test_svm)
 }
 
 print(f'Baseline train score: {baseline_train_score:.2f}, test score: {baseline_test_score:.2f}')
