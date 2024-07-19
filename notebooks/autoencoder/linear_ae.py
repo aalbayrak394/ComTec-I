@@ -1,4 +1,4 @@
-# from https://github.com/shobrook/sequitur/blob/master/sequitur/models/linear_ae.py, 2024-07-20
+# modified from https://github.com/shobrook/sequitur/blob/master/sequitur/models/linear_ae.py, 2024-07-20
 
 # Third Party
 import torch.nn as nn
@@ -26,7 +26,7 @@ class Encoder(nn.Module):
             else:
                 layers.append(layer)
 
-        self.nn = nn.Sequential(*layers)
+        self.nn = nn.Sequential(nn.Flatten(), *layers)
 
     def forward(self, x):
         return self.nn(x)
@@ -46,8 +46,7 @@ class Decoder(nn.Module):
                 layers.extend([layer, h_activ])
             else:
                 layers.append(layer)
-
-        self.nn = nn.Sequential(*layers)
+        self.nn = nn.Sequential(*layers, nn.Unflatten(dim=1, unflattened_size=(100, 6)))
 
     def forward(self, x):
         return self.nn(x)
