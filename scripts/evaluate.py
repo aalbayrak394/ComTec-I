@@ -6,7 +6,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from feature_selection.fisher_score import fisher_score
-from sklearn.feature_selection import SelectKBest, SequentialFeatureSelector
+from sklearn.feature_selection import SelectKBest, SequentialFeatureSelector, RFE
 from sklearn.decomposition import PCA, KernelPCA
 from sklearn.metrics import accuracy_score, f1_score
 
@@ -30,12 +30,13 @@ scores = {
     'fisher': [],
     'pca': [],
     'knn': [],
+    'svm': [],
 }
 
-print('Evaluate feature selection algorithms with RandomForestClassifier...')
+print('# Evaluate feature selection algorithms with RandomForestClassifier.')
 for i, (X_train, y_train, X_test, y_test) in enumerate(splits):
     # Extract features
-    print(f'Extracting features from split {i+1}...')
+    print(f'### Extracting features from split {i+1}')
     X_train_features = compute_features(X_train)
     y_train = y_train.astype(str)
 
@@ -43,15 +44,16 @@ for i, (X_train, y_train, X_test, y_test) in enumerate(splits):
     y_test = y_test.astype(str)
 
     # Train baseline model with all features
-    rf = RandomForestClassifier(n_estimators=500)
+    rf = RandomForestClassifier(n_estimators=500, max_depth=70, criterion='log_loss')
     rf.fit(X_train_features, y_train)
     y_pred = rf.predict(X_test_features)
     baseline_score = f1_score(y_test, y_pred, average='micro')
     scores['baseline'].append(baseline_score)
+    print(f'Baseline score: {baseline_score:.4f}')
 
-    # TODO: apply different feature selection algorithms
+    # # TODO: apply different feature selection algorithms
     # 1. Fisher Score
-    fisher_selector = SelectKBest(fisher_score, k=30)
+    fisher_selector = SelectKBest(fisher_score, k=10)
     X_train_fisher = fisher_selector.fit_transform(X_train_features, y_train)
     X_test_fisher = fisher_selector.transform(X_test_features)
 
@@ -60,8 +62,8 @@ for i, (X_train, y_train, X_test, y_test) in enumerate(splits):
     X_train_pca = pca.fit_transform(X_train_features)
     X_test_pca = pca.transform(X_test_features)
     
-    # TODO: 3. Sequential Feature Selector with KNN
-    seq_selector = SequentialFeatureSelector(KNeighborsClassifier(), n_features_to_select=30)
+    # 3. Sequential Feature Selector with KNN
+    seq_selector = SequentialFeatureSelector(KNeighborsClassifier(), n_features_to_select=10)
     seq_selector.fit(X_train_features, y_train)
     X_train_knn = seq_selector.transform(X_train_features)
     X_test_knn = seq_selector.transform(X_test_features)
@@ -69,22 +71,30 @@ for i, (X_train, y_train, X_test, y_test) in enumerate(splits):
     # TODO: 4. Autoencoder  
 
     # TODO: 5. SVC
+    svc = SVC(kernel="linear", C=1)
+    svm_selector = RFE(estimator=svc, n_features_to_select=10, step=1)
+    svm_selector.fit(X_train_features, y_train)
+    X_train_svm = svm_selector.transform(X_train_features)
+    X_test_svm = svm_selector.transform(X_test_features)
 
     # TODO: Evaluate each subset of features with RandomForestClassifier
     selected_features = {
         'fisher': (X_train_fisher, X_test_fisher),
         'pca': (X_train_pca, X_test_pca),
         'knn': (X_train_knn, X_test_knn),
+        'svm': (X_train_svm, X_test_svm),
     }
 
     for name, (X_train_selected, X_test_selected) in selected_features.items():
-        rf = RandomForestClassifier(n_estimators=500)
+        rf = RandomForestClassifier(n_estimators=500, max_depth=70, criterion='log_loss')
         rf.fit(X_train_selected, y_train)
         y_pred = rf.predict(X_test_selected)
         score = f1_score(y_test, y_pred, average='micro')
         scores[name].append(score)
+        print(f'- {name}:  {score:.4f}')
 
 # Print CV results
+print('### Cross-validation results')
 for name, values in scores.items():
     mean_score = sum(values) / len(values)
-    print(f'{name}: {mean_score}')
+    print(f'- {name}:  {mean_score:.4f}')
