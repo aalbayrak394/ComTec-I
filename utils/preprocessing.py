@@ -55,9 +55,10 @@ class PreprocessingPipeline:
 
         return windows_, np.array(labels_, dtype='S')
     
-    def run(self):
+
+    def get_full_data(self, concat=True):
         persons = self.ntp_intervals.keys()
-        train_sets = []
+        data_sets = []
 
         for name in persons:
             # load person's data and concat accelerometer and gyroscope
@@ -99,13 +100,37 @@ class PreprocessingPipeline:
             data.iloc[:, :8] = data.iloc[:, :8].ffill()
             data['Curb_Label'] = data['Curb_Label'].fillna('')
             
-            train_sets.append(data)
+            data_sets.append(data)
+
+        if concat:
+            # Concatenate and scale all data
+            full_data = pd.concat(data_sets)
+            X = full_data[['Acc-X', 'Acc-Y', 'Acc-Z', 'Gyr-X', 'Gyr-Y', 'Gyr-Z']]
+            y = full_data[['Roughness_Label', 'Curb_Label']]
+            scaler = StandardScaler().fit(X)
+            X_scaled = scaler.transform(X)
+
+            windows, labels = self._create_sliding_windows_with_labels(
+                y['Roughness_Label'],
+                y['Curb_Label'],
+                window_size=100,
+                step_size=50,
+                scaled_data_=X_scaled
+            )
+
+            return windows, labels
+        
+        return data_sets
+    
+    
+    def create_cv_splits(self):
+        data_sets = self.get_full_data(concat=False)
 
         # Create CV splits
         splits = []
-        for set in train_sets:
+        for set in data_sets:
             test_set = set
-            train_set = pd.concat([x for x in train_sets if x is not set])
+            train_set = pd.concat([x for x in data_sets if x is not set])
 
             # Fit scaler on train set and fit on train and test set
             X_train = train_set[['Acc-X', 'Acc-Y', 'Acc-Z', 'Gyr-X', 'Gyr-Y', 'Gyr-Z']]

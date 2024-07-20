@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from scipy.signal import find_peaks
 from scipy.stats import mode, skew
+import scipy.signal as signal
 
 # 3-axis accelerometer, 3-axis gyroscope -> 6 sensors
 raw_features = ['acc_x', 'acc_y', 'acc_z', 'gyro_x', 'gyro_y', 'gyro_z']
@@ -55,6 +56,14 @@ def compute_features(window_dataset):
             # 15) Max, 16) Min
             features[f'max_{sensor}'] = np.max(window[:, idx])
             features[f'min_{sensor}'] = np.min(window[:, idx])
+
+            # 17) Spectral Entropy
+            f, psd = signal.welch(window[:, idx], fs=50, nperseg=100)
+            psd_norm = psd / np.sum(psd)
+            spectral_entropy = -np.sum(psd_norm * np.log2(psd_norm + 1e-10))
+            features[f'spectral_entropy_{sensor}'] = spectral_entropy
+
+
 
         # Covariance
         for i in range(6):

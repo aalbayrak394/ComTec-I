@@ -6,24 +6,28 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from feature_selection.fisher_score import fisher_score
-from sklearn.feature_selection import SelectKBest, SequentialFeatureSelector, RFE
+from sklearn.feature_selection import SelectKBest, SelectPercentile, SequentialFeatureSelector, RFE
 from sklearn.decomposition import PCA, KernelPCA
 from sklearn.metrics import accuracy_score, f1_score
 
 from utils.preprocessing import PreprocessingPipeline
 from utils.feature_extraction import compute_features
+import tsfel
 
 
-# Load dataset
-print('Loading dataset...')
-ntp_intervals = {
+NTP_INTERVALS = {
     '1_marco': ('2024-05-28 15:21:46.830', '2024-05-28 15:36:21.000'),
     '2_svenja': ('2024-05-28 15:39:02.218', '2024-05-28 15:52:16.613'),
     '3_konstantin': ('2024-05-28 15:56:31.000', '2024-05-28 16:09:37.000'),
     '4_aleyna': ('2024-05-28 16:11:26.149', '2024-05-28 16:21:35.000'),
 }
-pipeline = PreprocessingPipeline(ntp_intervals)
-splits = pipeline.run()
+
+N_FEATURES_TO_SELECT = 10
+
+# Load dataset
+print('Loading dataset...')
+pipeline = PreprocessingPipeline(NTP_INTERVALS)
+splits = pipeline.create_splits()
 
 scores = {
     'baseline': [],
@@ -51,19 +55,19 @@ for i, (X_train, y_train, X_test, y_test) in enumerate(splits):
     scores['baseline'].append(baseline_score)
     print(f'Baseline score: {baseline_score:.4f}')
 
-    # # TODO: apply different feature selection algorithms
+    # TODO: apply different feature selection algorithms
     # 1. Fisher Score
-    fisher_selector = SelectKBest(fisher_score, k=10)
+    fisher_selector = SelectPercentile(fisher_score, percentile=8)
     X_train_fisher = fisher_selector.fit_transform(X_train_features, y_train)
     X_test_fisher = fisher_selector.transform(X_test_features)
 
-    # 2. PCA
-    pca = KernelPCA(n_components=10, kernel='sigmoid')
+    # 2. PCA - Dimensionality Reduction
+    pca = PCA(n_components=N_FEATURES_TO_SELECT)
     X_train_pca = pca.fit_transform(X_train_features)
     X_test_pca = pca.transform(X_test_features)
     
     # 3. Sequential Feature Selector with KNN
-    seq_selector = SequentialFeatureSelector(KNeighborsClassifier(), n_features_to_select=10)
+    seq_selector = SequentialFeatureSelector(KNeighborsClassifier(), n_features_to_select=N_FEATURES_TO_SELECT)
     seq_selector.fit(X_train_features, y_train)
     X_train_knn = seq_selector.transform(X_train_features)
     X_test_knn = seq_selector.transform(X_test_features)
