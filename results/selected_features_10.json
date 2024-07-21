@@ -1,0 +1,38 @@
+{
+    "fisher": [
+        "max_acc_z",
+        "range_acc_z",
+        "max_gyro_x",
+        "min_acc_y",
+        "range_acc_y",
+        "range_gyro_x",
+        "min_acc_z",
+        "std_acc_y",
+        "rms_acc_y",
+        "rms_acc_z"
+    ],
+    "svc": [
+        "std_acc_y",
+        "rms_acc_y",
+        "mad_acc_y",
+        "rms_acc_z",
+        "peak_time_acc_z",
+        "std_gyro_x",
+        "mad_gyro_x",
+        "cov_acc_y_gyro_x",
+        "cov_acc_z_gyro_z",
+        "corr_acc_y_gyro_x"
+    ],
+    "knn": [
+        "mean_acc_y",
+        "std_acc_y",
+        "iqr_acc_y",
+        "avg_deriv_acc_z",
+        "zcr_acc_z",
+        "mean_gyro_x",
+        "mad_gyro_x",
+        "cov_acc_y_acc_z",
+        "corr_acc_y_acc_z",
+        "corr_acc_z_gyro_z"
+    ]
+}

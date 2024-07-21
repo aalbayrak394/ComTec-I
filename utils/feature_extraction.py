@@ -68,12 +68,14 @@ def compute_features(window_dataset):
         # Covariance
         for i in range(6):
             for j in range(i + 1, 6):
-                features[f'cov_{raw_features[i]}_{raw_features[j]}'] = np.cov(window[:, i], window[:, j])[0, 1]
+                if not f'cov_{raw_features[j]}_{raw_features[i]}' in features:
+                    features[f'cov_{raw_features[i]}_{raw_features[j]}'] = np.cov(window[:, i], window[:, j])[0, 1]
 
         # Pairwise Correlation
         for i in range(6):
             for j in range(i + 1, 6):
-                features[f'corr_{raw_features[i]}_{raw_features[j]}'] = np.corrcoef(window[:, i], window[:, j])[0, 1]
+                if not f'corr_{raw_features[j]}_{raw_features[i]}' in features:
+                    features[f'corr_{raw_features[i]}_{raw_features[j]}'] = np.corrcoef(window[:, i], window[:, j])[0, 1]
     
         engineered_features.append(features)
 
