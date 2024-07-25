@@ -5,7 +5,6 @@ def fisher_score(X, y):
     X = np.array(X)
     y = np.array(y)
     classes = np.unique(y)
-    print(classes)
     n_features = X.shape[1]
     
     fisher_scores = np.zeros(n_features)
