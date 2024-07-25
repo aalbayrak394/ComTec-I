@@ -51,7 +51,7 @@ for i, (X_train, y_train, X_test, y_test) in enumerate(splits):
     scores['baseline'].append(baseline_score)
     print(f'Baseline score: {baseline_score:.4f}')
 
-    # # TODO: apply different feature selection algorithms
+    # apply different feature selection algorithms
     # 1. Fisher Score
     fisher_selector = SelectKBest(fisher_score, k=10)
     X_train_fisher = fisher_selector.fit_transform(X_train_features, y_train)
@@ -68,16 +68,16 @@ for i, (X_train, y_train, X_test, y_test) in enumerate(splits):
     X_train_knn = seq_selector.transform(X_train_features)
     X_test_knn = seq_selector.transform(X_test_features)
 
-    # TODO: 4. Autoencoder  
+    # 4. Autoencoder  
 
-    # TODO: 5. SVC
+    # 5. SVC
     svc = SVC(kernel="linear", C=1)
     svm_selector = RFE(estimator=svc, n_features_to_select=10, step=1)
     svm_selector.fit(X_train_features, y_train)
     X_train_svm = svm_selector.transform(X_train_features)
     X_test_svm = svm_selector.transform(X_test_features)
 
-    # TODO: Evaluate each subset of features with RandomForestClassifier
+    # Evaluate each subset of features with RandomForestClassifier
     selected_features = {
         'fisher': (X_train_fisher, X_test_fisher),
         'pca': (X_train_pca, X_test_pca),
